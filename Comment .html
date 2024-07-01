@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Section</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+         body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.comment-box {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+#comments {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.comment {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment .name {
+    font-weight: bold;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comment Section</h1>
+        <div class="comment-box">
+            <input type="text" id="nameInput" placeholder="Enter your name">
+            <textarea id="commentInput" placeholder="Enter your comment"></textarea>
+            <button id="postComment">Post Comment</button>
+        </div>
+        <div id="comments"></div>
+    </div>
+    <script>
+        document.getElementById('postComment').addEventListener('click', function() {
+    const nameInput = document.getElementById('nameInput');
+    const commentInput = document.getElementById('commentInput');
+    const nameText = nameInput.value.trim();
+    const commentText = commentInput.value.trim();
+
+    if (nameText && commentText) {
+        const comment = {
+            id: Date.now(), // Use timestamp as a unique ID
+            name: nameText,
+            text: commentText,
+            timestamp: new Date().toISOString()
+        };
+
+        addCommentToDOM(comment);
+        saveComment(comment);
+
+        nameInput.value = '';
+        commentInput.value = '';
+    }
+});
+
+function addCommentToDOM(comment) {
+    const commentsDiv = document.getElementById('comments');
+    const commentDiv = document.createElement('div');
+    commentDiv.classList.add('comment');
+    commentDiv.dataset.id = comment.id;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.classList.add('name');
+    nameSpan.textContent = comment.name;
+
+    const textSpan = document.createElement('span');
+    textSpan.textContent = `: ${comment.text} (${new Date(comment.timestamp).toLocaleString()})`;
+
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('delete-button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', function() {
+        deleteComment(comment.id);
+    });
+
+    commentDiv.appendChild(nameSpan);
+    commentDiv.appendChild(textSpan);
+    commentDiv.appendChild(deleteButton);
+    commentsDiv.appendChild(commentDiv);
+}
+
+function saveComment(comment) {
+    const comments = getComments();
+    comments.push(comment);
+    localStorage.setItem('comments', JSON.stringify(comments));
+}
+
+function getComments() {
+    const comments = localStorage.getItem('comments');
+    return comments ? JSON.parse(comments) : [];
+}
+
+function deleteComment(id) {
+    let comments = getComments();
+    comments = comments.filter(comment => comment.id !== id);
+    localStorage.setItem('comments', JSON.stringify(comments));
+    document.querySelector(`[data-id="${id}"]`).remove();
+}
+
+function loadComments() {
+    const comments = getComments();
+    comments.forEach(addCommentToDOM);
+}
+
+document.addEventListener('DOMContentLoaded', loadComments);
+
+    </script>
+</body>
+</html>
